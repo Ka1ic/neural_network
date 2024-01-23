@@ -1,9 +1,7 @@
-import copy
-import tkinter.ttk
-
 import numpy as np
 import pandas as pd
 from tkinter import *
+import tkinter.ttk
 
 # activation function and her derivitev
 relu = lambda x: (x >= 0) * x
@@ -18,24 +16,19 @@ X = train.drop(labels=['label'], axis=1)
 X = X / 255.0
 X = X.values
 
+# a convenient type of response
+Y_acum = np.zeros((len(X), 10))
+for i, l in enumerate(Y):
+    Y_acum[i][l] = 1
+Y = Y_acum
+
 # separation data to test and train
-test_size = 7200
+test_size = 10000
 X_train = X[:-test_size]
 Y_train = Y[:-test_size]
 
 X_test = X[-test_size:]
 Y_test = Y[-test_size:]
-
-# a convenient type of response
-Y_acum = np.zeros((len(X_train), 10))
-for i, l in enumerate(Y_train):
-    Y_acum[i][l] = 1
-Y_train = copy.deepcopy(Y_acum)
-
-Y_acum = np.zeros((len(X_test), 10))
-for i, l in enumerate(Y_test):
-    Y_acum[i][l] = 1
-Y_test = copy.deepcopy(Y_acum)
 
 # inicialization weights and other variables
 layer_0 = X_train[0]
