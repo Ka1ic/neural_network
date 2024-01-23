@@ -35,7 +35,7 @@ layer_0 = X_train[0]
 hidden_size = 40
 epochs = 10
 alpha = 0.005
-batch_size = 1
+batch_size = 72
 weights_0_1 = np.random.random((784, hidden_size)) * 0.2 - 0.1
 weights_1_2 = np.random.random((hidden_size, 10)) * 0.2 - 0.1
 
@@ -49,22 +49,23 @@ def get_pred(inp):
 # lerning and testing part
 for epoch in range(epochs):
     error, correct_cnt = 0.0, 0
-    for i in range(len(X_train) - batch_size + 1):
-        layer_0 = X_train[i:i + batch_size]
+    for i in range(len(X_train) // batch_size):
+        batch_start, batch_end = batch_size * i, batch_size * (i + 1)
+        layer_0 = X_train[batch_start:batch_end]
         layer_1 = relu(np.dot(layer_0, weights_0_1))
         layer_2 = np.dot(layer_1, weights_1_2)
 
-        error += np.sum((Y_train[i:i + batch_size] - layer_2) ** 2)
-        correct_cnt += int(np.argmax(layer_2) == np.argmax(Y_train[i:i + 1]))
+        error += np.sum((Y_train[batch_start:batch_end] - layer_2) ** 2)
+        correct_cnt += int(np.argmax(layer_2) == np.argmax(Y_train[batch_start:batch_end]))
 
-        layer_2_delta = (Y_train[i:i + batch_size] - layer_2)
+        layer_2_delta = (Y_train[batch_start:batch_end] - layer_2)
         layer_1_delta = np.dot(layer_2_delta, weights_1_2.T) * relu_deriv(np.dot(layer_0, weights_0_1))
 
         weights_1_2 += np.dot(layer_1.T, layer_2_delta) * alpha
         weights_0_1 += np.dot(layer_0.T, layer_1_delta) * alpha
 
-        if i % 10000 == 0:
-            print(f'{round(i * 100 / len(X_train))}%')
+        if i % (10000 // batch_size) == 0:
+            print(f'{round(i * 100 / len(X_train) * batch_size)}%')
 
     test_error, test_correct_cnt = 0.0, 0
     for i in range(len(X_test)):
@@ -86,7 +87,7 @@ def paint_number():
     clear_canvas()
     global ind_num, lable_current_number
     num = X[ind_num]
-    lable_current_number['text'] = f"Current number: {Y[ind_num]}"
+    lable_current_number['text'] = f"Current number: {Y_train[ind_num].argmax()}"
     ind_num += 1
     for i in range(784):
         if num[i] != 0:
@@ -143,7 +144,7 @@ canvas.bind("<B1-Motion>", draw)
 
 Button(root, text="Clear", width=12, command=clear_canvas).grid(row=2, column=2)
 Button(root, text="next num", width=12, command=paint_number).grid(row=2, column=3)
-lable_current_number = Label(root, text=f"Current number: {Y[ind_num]}", font="20")
+lable_current_number = Label(root, text=f"Current number: {Y_train[ind_num].argmax()}", font="20")
 lable_current_number.grid(row=2, column=4)
 lable_pred_number = Label(root, text=f"Current number: {-1}", font="20")
 lable_pred_number.grid(row=2, column=5)
