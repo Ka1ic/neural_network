@@ -3,6 +3,9 @@ import pandas as pd
 from tkinter import *
 import tkinter.ttk
 
+#random settings
+np.random.seed(72)
+
 # activation function and her derivitev
 relu = lambda x: (x >= 0) * x
 relu_deriv = lambda x: x >= 0
@@ -31,9 +34,8 @@ X_test = X[-test_size:]
 Y_test = Y[-test_size:]
 
 # inicialization weights and other variables
-layer_0 = X_train[0]
-hidden_size = 40
-epochs = 10
+hidden_size = 72
+epochs = 72
 alpha = 0.005
 batch_size = 72
 weights_0_1 = np.random.random((784, hidden_size)) * 0.2 - 0.1
@@ -53,6 +55,9 @@ for epoch in range(epochs):
         batch_start, batch_end = batch_size * i, batch_size * (i + 1)
         layer_0 = X_train[batch_start:batch_end]
         layer_1 = relu(np.dot(layer_0, weights_0_1))
+        # dropout
+        dropout_mask = np.random.randint(2, size=layer_1.shape)
+        layer_1 *= dropout_mask * 2
         layer_2 = np.dot(layer_1, weights_1_2)
 
         error += np.sum((Y_train[batch_start:batch_end] - layer_2) ** 2)
@@ -60,6 +65,8 @@ for epoch in range(epochs):
 
         layer_2_delta = (Y_train[batch_start:batch_end] - layer_2)
         layer_1_delta = np.dot(layer_2_delta, weights_1_2.T) * relu_deriv(np.dot(layer_0, weights_0_1))
+
+        layer_1_delta *= dropout_mask
 
         weights_1_2 += np.dot(layer_1.T, layer_2_delta) * alpha
         weights_0_1 += np.dot(layer_0.T, layer_1_delta) * alpha
@@ -131,7 +138,7 @@ canvas_matrix = np.zeros((1, 784))
 
 root = Tk()
 root.title("Digit recognaizer")
-root.geometry("800x720")
+root.geometry("720x720")
 root.resizable(0, 0)
 
 root.columnconfigure(12, weight=1)

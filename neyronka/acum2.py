@@ -1,5 +1,3 @@
 import numpy as np
 
-b = np.array([[1,2], [3,4]])
-
-print(b.argmax())
+print(np.sum(np.random.randint(2, size=10)))
